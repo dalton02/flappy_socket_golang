@@ -20,6 +20,7 @@ type Players struct {
 	ID          int    `json:"id"`
 	Nome        string `json:"nome"`
 	Pontuacao   int    `json:"pontuacao"`
+	Skin        string `json:"skin"`
 	SocketCon   *websocket.Conn
 }
 
@@ -46,7 +47,8 @@ func MainServer() {
 
 	http.HandleFunc("/upgrade", upgrade)
 	corts := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
+		AllowedOrigins:      []string{"*"},
+		AllowPrivateNetwork: true,
 	})
 	licor.SetCors(corts)
 	licor.Public[auth_dto.LoginRequest, any]("/auth/login").Post(auth_controller.Login)
@@ -126,6 +128,7 @@ func socket(c *websocket.Conn, player *Players) error {
 		for i, obj := range players {
 			if playerMemoria.ID == obj.ID {
 				players[i].Coordenadas = playerMemoria.Coordenadas
+				players[i].Skin = playerMemoria.Skin
 				if players[i].Pontuacao < playerMemoria.Pontuacao {
 					go updateScore(playerMemoria.Pontuacao, playerMemoria.ID)
 				}
