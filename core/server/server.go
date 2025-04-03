@@ -130,6 +130,7 @@ func socket(c *websocket.Conn, player *Players) error {
 				players[i].Coordenadas = playerMemoria.Coordenadas
 				players[i].Skin = playerMemoria.Skin
 				if players[i].Pontuacao < playerMemoria.Pontuacao {
+					players[i].Pontuacao = playerMemoria.Pontuacao
 					go updateScore(playerMemoria.Pontuacao, playerMemoria.ID)
 				}
 				emitUpdatedList()
@@ -168,7 +169,6 @@ func onConnection(player Players) {
 }
 
 func updateScore(score int, id int) {
-
 	query := "UPDATE Usuario SET pontuacao = $1 WHERE id = $2"
 
 	_, err := shared.DB.Exec(query, score, id)

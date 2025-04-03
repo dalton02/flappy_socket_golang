@@ -10,9 +10,10 @@ import (
 )
 
 func LoginService(loginReq auth_dto.LoginRequest) httpkit.HttpMessage {
+	var pontuacao string
 	var usuario auth_dto.Usuario
-	query := "SELECT id, nome, senha FROM Usuario WHERE nome = $1"
-	err := shared.DB.QueryRow(query, loginReq.Nome).Scan(&usuario.ID, &usuario.Nome, &usuario.Senha)
+	query := "SELECT id, nome, senha, pontuacao FROM Usuario WHERE nome = $1"
+	err := shared.DB.QueryRow(query, loginReq.Nome).Scan(&usuario.ID, &usuario.Nome, &pontuacao)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return httpkit.AppNotFound("Usuário não encontrado no sistema")
@@ -25,8 +26,9 @@ func LoginService(loginReq auth_dto.LoginRequest) httpkit.HttpMessage {
 	}
 
 	return httpkit.AppSucess("Sucesso ao logar", map[string]interface{}{
-		"id":   usuario.ID,
-		"nome": usuario.Nome,
+		"id":        usuario.ID,
+		"nome":      usuario.Nome,
+		"pontuacao": pontuacao,
 	})
 }
 
