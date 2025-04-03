@@ -12,6 +12,7 @@ import (
 
 	"github.com/dalton02/licor/licor"
 	"github.com/gorilla/websocket"
+	"github.com/rs/cors"
 )
 
 type Players struct {
@@ -44,7 +45,10 @@ var players []Players
 func MainServer() {
 
 	http.HandleFunc("/upgrade", upgrade)
-
+	corts := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+	})
+	licor.SetCors(corts)
 	licor.Public[auth_dto.LoginRequest, any]("/auth/login").Post(auth_controller.Login)
 	licor.Public[auth_dto.LoginRequest, any]("/auth/cadastro").Post(auth_controller.Cadastro)
 	licor.Public[any, any]("/scoreboard").Get(score_controller.LeadBoard)
