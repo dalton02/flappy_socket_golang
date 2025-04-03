@@ -13,7 +13,7 @@ func LoginService(loginReq auth_dto.LoginRequest) httpkit.HttpMessage {
 	var pontuacao string
 	var usuario auth_dto.Usuario
 	query := "SELECT id, nome, senha, pontuacao FROM Usuario WHERE nome = $1"
-	err := shared.DB.QueryRow(query, loginReq.Nome).Scan(&usuario.ID, &usuario.Nome, &pontuacao)
+	err := shared.DB.QueryRow(query, loginReq.Nome).Scan(&usuario.ID, &usuario.Nome, &usuario.Senha, &pontuacao)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return httpkit.AppNotFound("Usuário não encontrado no sistema")
