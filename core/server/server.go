@@ -9,6 +9,7 @@ import (
 	score_controller "loja-back/core/modules/score.module/controller"
 	"loja-back/core/server/shared"
 	"net/http"
+	"time"
 
 	"github.com/dalton02/licor/licor"
 	"github.com/gorilla/websocket"
@@ -45,6 +46,8 @@ var players []Players
 
 func MainServer() {
 
+	go broadcast()
+
 	http.HandleFunc("/upgrade", upgrade)
 	corts := cors.New(cors.Options{
 		AllowedOrigins:      []string{"*"},
@@ -54,11 +57,21 @@ func MainServer() {
 	licor.Public[auth_dto.LoginRequest, any]("/auth/login").Post(auth_controller.Login)
 	licor.Public[auth_dto.LoginRequest, any]("/auth/cadastro").Post(auth_controller.Cadastro)
 	licor.Public[any, any]("/scoreboard").Get(score_controller.LeadBoard)
-
+	licor.Public[any, any]("/score/{id}").Get(score_controller.UserScore)
 	licor.Init("4000")
 
 }
+func broadcast() {
+	ticker := time.NewTicker(200 * time.Millisecond)
+	defer ticker.Stop()
 
+	for {
+		select {
+		case <-ticker.C:
+			emitUpdatedList()
+		}
+	}
+}
 func upgrade(w http.ResponseWriter, r *http.Request) {
 	var player Players
 	c, err := upgrader.Upgrade(w, r, nil)
@@ -117,8 +130,6 @@ func socket(c *websocket.Conn, player *Players) error {
 		fmt.Println("Novo jogador conectado, lista atualizada: ")
 		fmt.Println(players)
 		c.WriteJSON(socketWritter)
-		emitUpdatedList()
-
 	}
 
 	if socketMessage.Tipo == "atualizarPlayer" {
@@ -133,7 +144,6 @@ func socket(c *websocket.Conn, player *Players) error {
 					players[i].Pontuacao = playerMemoria.Pontuacao
 					go updateScore(playerMemoria.Pontuacao, playerMemoria.ID)
 				}
-				emitUpdatedList()
 			}
 		}
 	}
@@ -149,6 +159,7 @@ func emitUpdatedList() {
 		"jogadores": players,
 		"mensagem":  "Lista atualizada de jogadores na memoria",
 	}
+	fmt.Println("Transmissão broadcast: ", players)
 
 	for _, conexao := range players {
 		conexao.SocketCon.WriteJSON(socketWritter)
