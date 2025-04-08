@@ -22,6 +22,8 @@ type Players struct {
 	Nome        string `json:"nome"`
 	Pontuacao   int    `json:"pontuacao"`
 	Skin        string `json:"skin"`
+	GameTime    int    `json:"gametime"`
+	Status      string `json:"status"`
 	SocketCon   *websocket.Conn
 }
 
@@ -140,6 +142,8 @@ func socket(c *websocket.Conn, player *Players) error {
 			if playerMemoria.ID == obj.ID {
 				players[i].Coordenadas = playerMemoria.Coordenadas
 				players[i].Skin = playerMemoria.Skin
+				players[i].GameTime = playerMemoria.GameTime
+				players[i].Status = playerMemoria.Status
 				if players[i].Pontuacao < playerMemoria.Pontuacao {
 					players[i].Pontuacao = playerMemoria.Pontuacao
 					go updateScore(playerMemoria.Pontuacao, playerMemoria.ID)
